@@ -9,12 +9,14 @@ const shiftRoutes = require('./modules/shifts/shifts.routes');
 const signupRoutes = require('./modules/signups/signups.routes');
 const deviceRoutes = require('./modules/devices/devices.routes');
 const errorHandler = require('./middleware/errorHandler');
+const requestContext = require('./middleware/requestContext');
 const AppError = require('./lib/AppError');
 
 const app = express();
 
 app.use(helmet());
 app.use(cors());
+app.use(requestContext);
 app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/orgs', orgRoutes);
@@ -36,6 +38,12 @@ app.get('/health', async (req, res, next) => {
     next(error);
   }
 });
+
+if (process.env.NODE_ENV === 'test') {
+  app.get('/__test__/error', (req, res, next) => {
+    next(new Error('sensitive test error'));
+  });
+}
 
 app.use((req, res, next) => {
   next(new AppError('Route not found', 404, 'ROUTE_NOT_FOUND'));
