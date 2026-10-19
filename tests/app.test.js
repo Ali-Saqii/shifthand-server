@@ -25,4 +25,40 @@ describe('GET /health', () => {
       }
     });
   });
+
+  describe('API errors', () => {
+    it('returns a JSON 404 for unknown routes', async () => {
+      const response = await request(app).get('/does-not-exist');
+
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({
+        error: {
+          code: 'ROUTE_NOT_FOUND',
+          message: 'Route not found'
+        }
+      });
+    });
+
+    it('returns a JSON 400 for malformed JSON', async () => {
+      const response = await request(app)
+        .post('/auth/login')
+        .set('content-type', 'application/json')
+        .send('{"email":');
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe('INVALID_JSON');
+    });
+
+    it('rate limits repeated authentication requests', async () => {
+      const responses = await Promise.all(
+        Array.from({ length: 21 }, () => request(app).post('/auth/login').send({
+          email: 'invalid@example.com',
+          password: 'password123'
+        }))
+      );
+
+      expect(responses.at(-1).status).toBe(429);
+      expect(responses.at(-1).body.error.code).toBe('RATE_LIMIT_EXCEEDED');
+    });
+  });
 });

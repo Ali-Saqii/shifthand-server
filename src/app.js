@@ -2,12 +2,26 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const sequelize = require('./db');
+const authRoutes = require('./modules/auth/auth.routes');
+const orgRoutes = require('./modules/orgs/orgs.routes');
+const eventRoutes = require('./modules/events/events.routes');
+const shiftRoutes = require('./modules/shifts/shifts.routes');
+const signupRoutes = require('./modules/signups/signups.routes');
+const deviceRoutes = require('./modules/devices/devices.routes');
+const errorHandler = require('./middleware/errorHandler');
+const AppError = require('./lib/AppError');
 
 const app = express();
 
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use('/auth', authRoutes);
+app.use('/orgs', orgRoutes);
+app.use('/orgs/:organizationId/events', eventRoutes);
+app.use('/events', shiftRoutes);
+app.use('/shifts', signupRoutes);
+app.use('/devices', deviceRoutes);
 
 app.get('/health', async (req, res, next) => {
   try {
@@ -23,18 +37,10 @@ app.get('/health', async (req, res, next) => {
   }
 });
 
-app.use((error, req, res, next) => {
-  if (res.headersSent) {
-    next(error);
-    return;
-  }
-
-  res.status(503).json({
-    error: {
-      code: 'SERVICE_UNAVAILABLE',
-      message: 'Service is unavailable'
-    }
-  });
+app.use((req, res, next) => {
+  next(new AppError('Route not found', 404, 'ROUTE_NOT_FOUND'));
 });
+
+app.use(errorHandler);
 
 module.exports = app;
