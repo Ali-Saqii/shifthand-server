@@ -7,9 +7,7 @@ function createAccessToken(user) {
 }
 
 function createRefreshToken(user) {
-  return jwt.sign({ sub: user.id, type: 'refresh', jti: crypto.randomUUID() }, config.jwt.refreshSecret, {
-    expiresIn: '30d'
-  });
+  return crypto.randomBytes(32).toString('hex');
 }
 
 function hashToken(token) {
@@ -20,14 +18,9 @@ function verifyAccessToken(token) {
   return jwt.verify(token, config.jwt.accessSecret);
 }
 
-function verifyRefreshToken(token) {
-  return jwt.verify(token, config.jwt.refreshSecret);
-}
-
 module.exports = {
   createAccessToken,
   createRefreshToken,
   hashToken,
-  verifyAccessToken,
-  verifyRefreshToken
+  verifyAccessToken
 };

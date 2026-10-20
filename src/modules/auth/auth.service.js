@@ -3,8 +3,7 @@ const AppError = require('../../lib/AppError');
 const {
   createAccessToken,
   createRefreshToken,
-  hashToken,
-  verifyRefreshToken
+  hashToken
 } = require('../../lib/tokens');
 
 function getModels() {
@@ -13,24 +12,33 @@ function getModels() {
 
 function tokenResponse(user, refreshToken) {
   return {
-    user: { id: user.id, name: user.name, email: user.email },
+    user: { id: user.id, name: user.name, email: user.email, phone: user.phone },
     accessToken: createAccessToken(user),
     refreshToken
   };
 }
 
-async function register({ name, email, password }) {
+async function register({ name, email, password, phone }) {
   const { User, RefreshToken } = getModels();
   const existing = await User.findOne({ where: { email } });
   if (existing) {
-    throw new AppError('Email is already registered', 409, 'EMAIL_ALREADY_REGISTERED');
+    throw new AppError('Email is already registered', 409, 'EMAIL_TAKEN');
   }
 
-  const user = await User.create({
-    name,
-    email,
-    passwordHash: await bcrypt.hash(password, 12)
-  });
+  let user;
+  try {
+    user = await User.create({
+      name,
+      email,
+      phone,
+      passwordHash: await bcrypt.hash(password, 12)
+    });
+  } catch (error) {
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      throw new AppError('Email is already registered', 409, 'EMAIL_TAKEN');
+    }
+    throw error;
+  }
   const refreshToken = createRefreshToken(user);
   await RefreshToken.create({
     userId: user.id,
@@ -58,21 +66,14 @@ async function login({ email, password }) {
 
 async function refresh(refreshToken) {
   const { User, RefreshToken } = getModels();
-  let payload;
-  try {
-    payload = verifyRefreshToken(refreshToken);
-  } catch (error) {
-    throw new AppError('Invalid or expired refresh token', 401, 'INVALID_REFRESH_TOKEN');
-  }
-
   const stored = await RefreshToken.findOne({
-    where: { userId: payload.sub, tokenHash: hashToken(refreshToken), revokedAt: null }
+    where: { tokenHash: hashToken(refreshToken), revokedAt: null }
   });
   if (!stored || stored.expiresAt <= new Date()) {
     throw new AppError('Invalid or expired refresh token', 401, 'INVALID_REFRESH_TOKEN');
   }
 
-  const user = await User.findByPk(payload.sub);
+  const user = await User.findByPk(stored.userId);
   if (!user) {
     throw new AppError('Invalid or expired refresh token', 401, 'INVALID_REFRESH_TOKEN');
   }

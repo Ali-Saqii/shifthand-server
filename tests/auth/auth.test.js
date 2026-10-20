@@ -16,7 +16,6 @@ const {
   createAccessToken,
   createRefreshToken,
   verifyAccessToken,
-  verifyRefreshToken,
   hashToken
 } = require('../../src/lib/tokens');
 const schemas = require('../../src/modules/auth/auth.schema');
@@ -30,13 +29,10 @@ describe('authentication security', () => {
     expect(payload.type).toBe('access');
   });
 
-  it('uses a separate refresh-token secret and type', () => {
+  it('creates a random 256-bit refresh token', () => {
     const token = createRefreshToken({ id: 'user-1' });
-    const payload = verifyRefreshToken(token);
 
-    expect(payload.sub).toBe('user-1');
-    expect(payload.type).toBe('refresh');
-    expect(payload.jti).toEqual(expect.any(String));
+    expect(token).toMatch(/^[0-9a-f]{64}$/);
     expect(() => verifyAccessToken(token)).toThrow();
   });
 
@@ -66,6 +62,13 @@ describe('authentication security', () => {
     expect(schemas.login.validate({
       email: 'user@example.com',
       password: 'password123'
+    }).error).toBeUndefined();
+
+    expect(schemas.register.validate({
+      name: 'Test User',
+      email: 'user@example.com',
+      password: 'password123',
+      phone: '+15551234567'
     }).error).toBeUndefined();
   });
 });
