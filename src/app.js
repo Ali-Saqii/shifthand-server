@@ -18,14 +18,47 @@ app.use(helmet());
 app.use(cors());
 app.use(requestContext);
 app.use(express.json());
-app.use('/auth', authRoutes);
-app.use('/orgs', orgRoutes);
-app.use('/orgs/:organizationId/events', eventRoutes);
-app.use('/events', shiftRoutes);
-app.use('/shifts', signupRoutes);
-app.use('/devices', deviceRoutes);
+function mountApiRoutes(prefix) {
+  app.use(`${prefix}/auth`, authRoutes);
+  app.use(`${prefix}/orgs`, orgRoutes);
+  app.use(`${prefix}/orgs/:organizationId/events`, eventRoutes);
+  app.use(`${prefix}/events`, shiftRoutes);
+  app.use(`${prefix}/shifts`, signupRoutes);
+  app.use(`${prefix}/devices`, deviceRoutes);
+}
+
+mountApiRoutes('');
+mountApiRoutes('/api/v1');
 
 app.get('/health', async (req, res, next) => {
+  try {
+    await sequelize.authenticate();
+    res.status(200).json({
+      data: {
+        status: 'ok',
+        database: 'connected'
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/healthz', async (req, res, next) => {
+  try {
+    await sequelize.authenticate();
+    res.status(200).json({
+      data: {
+        status: 'ok',
+        database: 'connected'
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/v1/healthz', async (req, res, next) => {
   try {
     await sequelize.authenticate();
     res.status(200).json({

@@ -27,6 +27,24 @@ describe('GET /health', () => {
     });
   });
 
+  it('supports the guide health endpoint and versioned API namespace', async () => {
+    const health = await request(app).get('/healthz');
+    const versionedHealth = await request(app).get('/api/v1/healthz');
+    const versionedLogin = await request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'invalid@example.com',
+        password: 'password123',
+        unexpected: true
+      });
+
+    expect(health.status).toBe(200);
+    expect(versionedHealth.status).toBe(200);
+    expect(versionedHealth.body).toEqual(health.body);
+    expect(versionedLogin.status).toBe(422);
+    expect(versionedLogin.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
   describe('API errors', () => {
     it('preserves a valid request id', async () => {
       const response = await request(app)
@@ -98,7 +116,8 @@ describe('GET /health', () => {
       const responses = await Promise.all(
         Array.from({ length: 21 }, () => request(app).post('/auth/login').send({
           email: 'invalid@example.com',
-          password: 'password123'
+          password: 'password123',
+          unexpected: true
         }))
       );
 

@@ -4,12 +4,15 @@ const schemas = require('./auth.schema');
 const validate = require('../../middleware/validate');
 const rateLimit = require('../../middleware/rateLimit');
 
-const router = express.Router();
+function createAuthRouter() {
+  const router = express.Router();
+  const authRateLimit = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
 
-const authRateLimit = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 });
+  router.post('/register', authRateLimit, validate(schemas.register), controller.register);
+  router.post('/login', authRateLimit, validate(schemas.login), controller.login);
+  router.post('/refresh', authRateLimit, validate(schemas.refresh), controller.refresh);
 
-router.post('/register', authRateLimit, validate(schemas.register), controller.register);
-router.post('/login', authRateLimit, validate(schemas.login), controller.login);
-router.post('/refresh', authRateLimit, validate(schemas.refresh), controller.refresh);
+  return router;
+}
 
-module.exports = router;
+module.exports = createAuthRouter;
