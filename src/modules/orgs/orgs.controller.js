@@ -3,7 +3,7 @@ const { sendData } = require('../../lib/respond');
 
 async function create(req, res, next) {
   try {
-    sendData(res, await orgService.create(req.user.id, req.body.name), 201);
+    sendData(res, await orgService.createWithDetails(req.user.id, req.body), 201);
   } catch (error) {
     next(error);
   }
@@ -37,6 +37,30 @@ async function addMember(req, res, next) {
   }
 }
 
+async function createInvite(req, res, next) {
+  try {
+    sendData(res, await orgService.createInvite(
+      req.params.organizationId,
+      req.body.email,
+      req.body.role
+    ), 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function acceptInvite(req, res, next) {
+  try {
+    sendData(res, await orgService.acceptInvite(
+      req.user.id,
+      req.params.organizationId,
+      req.body.code
+    ), 201);
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function removeMember(req, res, next) {
   try {
     await orgService.removeMember(req.params.organizationId, req.params.userId);
@@ -46,4 +70,18 @@ async function removeMember(req, res, next) {
   }
 }
 
-module.exports = { create, list, listMembers, addMember, removeMember };
+async function updateMember(req, res, next) {
+  try {
+    sendData(res, await orgService.updateMember(
+      req.params.organizationId,
+      req.params.userId,
+      req.body.role
+    ));
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = {
+  create, list, listMembers, addMember, createInvite, acceptInvite, removeMember, updateMember
+};

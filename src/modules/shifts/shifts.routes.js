@@ -19,7 +19,7 @@ router.post(
   '/:eventId',
   validate(schema.eventParams, 'params'),
   loadEventMembership,
-  requireRole('owner', 'admin'),
+  requireRole('owner', 'coordinator'),
   validate(schema.createShift),
   controller.create
 );
@@ -33,7 +33,7 @@ router.patch(
   '/:eventId/:shiftId',
   validate(schema.params, 'params'),
   loadEventMembership,
-  requireRole('owner', 'admin'),
+  requireRole('owner', 'coordinator'),
   validate(schema.updateShift),
   controller.update
 );
@@ -41,7 +41,7 @@ router.delete(
   '/:eventId/:shiftId',
   validate(schema.params, 'params'),
   loadEventMembership,
-  requireRole('owner', 'admin'),
+  requireRole('owner', 'coordinator'),
   controller.remove
 );
 

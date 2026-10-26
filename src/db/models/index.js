@@ -9,6 +9,7 @@ const Shift = require('./Shift');
 const Signup = require('./Signup');
 const DeviceToken = require('./DeviceToken');
 const RefreshToken = require('./RefreshToken');
+const StaffInvite = require('./StaffInvite');
 
 User.belongsToMany(Organization, { through: Membership, foreignKey: 'userId', otherKey: 'organizationId' });
 Organization.belongsToMany(User, { through: Membership, foreignKey: 'organizationId', otherKey: 'userId' });
@@ -28,6 +29,8 @@ User.hasMany(DeviceToken, { foreignKey: 'userId' });
 DeviceToken.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(RefreshToken, { foreignKey: 'userId' });
 RefreshToken.belongsTo(User, { foreignKey: 'userId' });
+Organization.hasMany(StaffInvite, { foreignKey: 'organizationId' });
+StaffInvite.belongsTo(Organization, { foreignKey: 'organizationId' });
 
 module.exports = {
   sequelize,
@@ -38,5 +41,6 @@ module.exports = {
   Shift,
   Signup,
   DeviceToken,
-  RefreshToken
+  RefreshToken,
+  StaffInvite
 };

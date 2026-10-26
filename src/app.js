@@ -2,12 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const sequelize = require('./db');
-const authRoutes = require('./modules/auth/auth.routes');
+const createAuthRouter = require('./modules/auth/auth.routes');
 const orgRoutes = require('./modules/orgs/orgs.routes');
 const eventRoutes = require('./modules/events/events.routes');
 const shiftRoutes = require('./modules/shifts/shifts.routes');
 const signupRoutes = require('./modules/signups/signups.routes');
 const deviceRoutes = require('./modules/devices/devices.routes');
+const authenticate = require('./middleware/authenticate');
+const meController = require('./modules/auth/me.controller');
 const errorHandler = require('./middleware/errorHandler');
 const requestContext = require('./middleware/requestContext');
 const AppError = require('./lib/AppError');
@@ -19,7 +21,7 @@ app.use(cors());
 app.use(requestContext);
 app.use(express.json());
 function mountApiRoutes(prefix) {
-  app.use(`${prefix}/auth`, authRoutes);
+  app.use(`${prefix}/auth`, createAuthRouter());
   app.use(`${prefix}/orgs`, orgRoutes);
   app.use(`${prefix}/orgs/:organizationId/events`, eventRoutes);
   app.use(`${prefix}/events`, shiftRoutes);
@@ -29,6 +31,8 @@ function mountApiRoutes(prefix) {
 
 mountApiRoutes('');
 mountApiRoutes('/api/v1');
+app.get('/me', authenticate, meController.me);
+app.get('/api/v1/me', authenticate, meController.me);
 
 app.get('/health', async (req, res, next) => {
   try {

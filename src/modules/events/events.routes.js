@@ -19,7 +19,7 @@ router.post(
   '/',
   validate(schema.organizationParams, 'params'),
   loadMembership,
-  requireRole('owner', 'admin'),
+  requireRole('owner', 'coordinator'),
   validate(schema.createEvent),
   controller.create
 );
@@ -33,7 +33,7 @@ router.patch(
   '/:eventId',
   validate(schema.eventParams, 'params'),
   loadMembership,
-  requireRole('owner', 'admin'),
+  requireRole('owner', 'coordinator'),
   validate(schema.updateEvent),
   controller.update
 );
@@ -41,7 +41,7 @@ router.delete(
   '/:eventId',
   validate(schema.eventParams, 'params'),
   loadMembership,
-  requireRole('owner', 'admin'),
+  requireRole('owner', 'coordinator'),
   controller.remove
 );
 

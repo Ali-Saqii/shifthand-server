@@ -88,4 +88,28 @@ async function refresh(refreshToken) {
   return tokenResponse(user, nextRefreshToken);
 }
 
-module.exports = { register, login, refresh };
+async function me(userId) {
+  const { User, Membership, Organization } = getModels();
+  const user = await User.findByPk(userId, {
+    attributes: ['id', 'name', 'email', 'phone'],
+    include: [{
+      model: Membership,
+      attributes: ['organizationId', 'role'],
+      include: [{ model: Organization, attributes: ['id', 'name', 'timezone', 'settings'] }]
+    }]
+  });
+  if (!user) {
+    throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+  }
+
+  const memberships = user.Memberships.map((membership) => ({
+    organization: membership.Organization,
+    role: membership.role
+  }));
+  return {
+    user: { id: user.id, name: user.name, email: user.email, phone: user.phone },
+    memberships
+  };
+}
+
+module.exports = { register, login, refresh, me };
