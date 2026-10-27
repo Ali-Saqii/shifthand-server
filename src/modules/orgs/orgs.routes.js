@@ -5,6 +5,7 @@ const loadMembership = require('../../middleware/loadMembership');
 const requireRole = require('../../middleware/requireRole');
 const controller = require('./orgs.controller');
 const schema = require('./orgs.schema');
+const { policies } = require('../../lib/organizationPolicies');
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.post(
   '/:organizationId/invites',
   validate(schema.organizationId, 'params'),
   loadMembership,
-  requireRole('owner', 'coordinator'),
+  requireRole(...policies.manageMembers),
   validate(schema.invite),
   controller.createInvite
 );
@@ -29,13 +30,14 @@ router.get(
   '/:organizationId/members',
   validate(schema.organizationId, 'params'),
   loadMembership,
+  requireRole(...policies.manageMembers),
   controller.listMembers
 );
 router.post(
   '/:organizationId/members',
   validate(schema.organizationId, 'params'),
   loadMembership,
-  requireRole('owner', 'coordinator'),
+  requireRole(...policies.manageMembers),
   validate(schema.addMember),
   controller.addMember
 );
@@ -43,14 +45,14 @@ router.delete(
   '/:organizationId/members/:userId',
   validate(schema.memberId, 'params'),
   loadMembership,
-  requireRole('owner', 'coordinator'),
+  requireRole(...policies.manageMembers),
   controller.removeMember
 );
 router.patch(
   '/:organizationId/members/:userId',
   validate(schema.memberId, 'params'),
   loadMembership,
-  requireRole('owner', 'coordinator'),
+  requireRole(...policies.manageMembers),
   validate(schema.updateMember),
   controller.updateMember
 );

@@ -5,6 +5,7 @@ const loadMembership = require('../../middleware/loadMembership');
 const requireRole = require('../../middleware/requireRole');
 const controller = require('./events.controller');
 const schema = require('./events.schema');
+const { policies } = require('../../lib/organizationPolicies');
 
 const router = express.Router({ mergeParams: true });
 
@@ -13,13 +14,14 @@ router.get(
   '/',
   validate(schema.organizationParams, 'params'),
   loadMembership,
+  validate(schema.listQuery, 'query'),
   controller.list
 );
 router.post(
   '/',
   validate(schema.organizationParams, 'params'),
   loadMembership,
-  requireRole('owner', 'coordinator'),
+  requireRole(...policies.manageEvents),
   validate(schema.createEvent),
   controller.create
 );
@@ -29,11 +31,25 @@ router.get(
   loadMembership,
   controller.get
 );
+router.post(
+  '/:eventId/publish',
+  validate(schema.eventParams, 'params'),
+  loadMembership,
+  requireRole(...policies.manageEvents),
+  controller.publish
+);
+router.post(
+  '/:eventId/cancel',
+  validate(schema.eventParams, 'params'),
+  loadMembership,
+  requireRole(...policies.manageEvents),
+  controller.cancel
+);
 router.patch(
   '/:eventId',
   validate(schema.eventParams, 'params'),
   loadMembership,
-  requireRole('owner', 'coordinator'),
+  requireRole(...policies.manageEvents),
   validate(schema.updateEvent),
   controller.update
 );
@@ -41,7 +57,7 @@ router.delete(
   '/:eventId',
   validate(schema.eventParams, 'params'),
   loadMembership,
-  requireRole('owner', 'coordinator'),
+  requireRole(...policies.manageEvents),
   controller.remove
 );
 

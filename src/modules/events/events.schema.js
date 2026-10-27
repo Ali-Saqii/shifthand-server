@@ -17,6 +17,11 @@ const createEvent = Joi.object({
 
 const updateEvent = Joi.object(eventFields).min(1);
 
+const listQuery = Joi.object({
+  cursor: Joi.string().trim().max(512),
+  limit: Joi.number().integer().min(1).max(100).default(20)
+});
+
 const eventParams = Joi.object({
   organizationId: Joi.string().guid({ version: 'uuidv4' }).required(),
   eventId: Joi.string().guid({ version: 'uuidv4' }).required()
@@ -26,4 +31,10 @@ const organizationParams = Joi.object({
   organizationId: Joi.string().guid({ version: 'uuidv4' }).required()
 });
 
-module.exports = { createEvent, updateEvent, eventParams, organizationParams };
+const publicEventParams = Joi.object({
+  publicSlug: Joi.string().trim().min(1).max(180).required()
+});
+
+module.exports = {
+  createEvent, updateEvent, listQuery, eventParams, organizationParams, publicEventParams
+};

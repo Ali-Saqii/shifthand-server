@@ -11,6 +11,11 @@ const Shift = sequelize.define('Shift', {
   startsAtUtc: { type: DataTypes.DATE, allowNull: true, field: 'starts_at_utc' },
   endsAtUtc: { type: DataTypes.DATE, allowNull: true, field: 'ends_at_utc' },
   capacity: { type: DataTypes.INTEGER.UNSIGNED, allowNull: false, validate: { min: 1 } },
+  status: {
+    type: DataTypes.ENUM('active', 'cancelled'),
+    allowNull: false,
+    defaultValue: 'active'
+  },
   reminderSentAt: { type: DataTypes.DATE, allowNull: true, field: 'reminder_sent_at' },
   cancelCutoffHours: {
     type: DataTypes.INTEGER.UNSIGNED,

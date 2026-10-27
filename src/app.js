@@ -13,6 +13,8 @@ const meController = require('./modules/auth/me.controller');
 const errorHandler = require('./middleware/errorHandler');
 const requestContext = require('./middleware/requestContext');
 const AppError = require('./lib/AppError');
+const eventController = require('./modules/events/events.controller');
+const eventSchema = require('./modules/events/events.schema');
 
 const app = express();
 
@@ -33,6 +35,11 @@ mountApiRoutes('');
 mountApiRoutes('/api/v1');
 app.get('/me', authenticate, meController.me);
 app.get('/api/v1/me', authenticate, meController.me);
+app.get(
+  '/api/v1/public/events/:publicSlug',
+  validatePublicEventSlug,
+  eventController.getPublic
+);
 
 app.get('/health', async (req, res, next) => {
   try {
@@ -89,3 +96,15 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 module.exports = app;
+
+function validatePublicEventSlug(req, res, next) {
+  const { value, error } = eventSchema.publicEventParams.validate(req.params);
+  if (error) {
+    next(new AppError('Request validation failed', 422, 'VALIDATION_ERROR', {
+      fields: { publicSlug: error.details[0].message }
+    }));
+    return;
+  }
+  req.params = value;
+  next();
+}

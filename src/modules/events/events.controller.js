@@ -11,7 +11,8 @@ async function create(req, res, next) {
 
 async function list(req, res, next) {
   try {
-    sendData(res, await eventService.list(req.params.organizationId));
+    const result = await eventService.list(req.params.organizationId, req.query);
+    sendData(res, result.items, 200, { nextCursor: result.nextCursor });
   } catch (error) {
     next(error);
   }
@@ -46,4 +47,28 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { create, list, get, update, remove };
+async function publish(req, res, next) {
+  try {
+    sendData(res, await eventService.publish(req.params.organizationId, req.params.eventId));
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function cancel(req, res, next) {
+  try {
+    sendData(res, await eventService.cancel(req.params.organizationId, req.params.eventId));
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function getPublic(req, res, next) {
+  try {
+    sendData(res, await eventService.getPublic(req.params.publicSlug));
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { create, list, get, update, remove, publish, cancel, getPublic };

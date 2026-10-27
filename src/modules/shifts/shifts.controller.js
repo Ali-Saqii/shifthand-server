@@ -11,7 +11,7 @@ async function create(req, res, next) {
 
 async function list(req, res, next) {
   try {
-    sendData(res, await shiftService.list(req.params.eventId));
+    sendData(res, await shiftService.list(req.params.eventId, req.user, req.membership));
   } catch (error) {
     next(error);
   }
@@ -19,7 +19,7 @@ async function list(req, res, next) {
 
 async function get(req, res, next) {
   try {
-    sendData(res, await shiftService.get(req.params.eventId, req.params.shiftId));
+    sendData(res, await shiftService.get(req.params.eventId, req.params.shiftId, req.user, req.membership));
   } catch (error) {
     next(error);
   }
@@ -30,7 +30,8 @@ async function update(req, res, next) {
     sendData(res, await shiftService.update(
       req.params.eventId,
       req.params.shiftId,
-      req.body
+      req.body,
+      req.membership
     ));
   } catch (error) {
     next(error);
@@ -38,12 +39,20 @@ async function update(req, res, next) {
 }
 
 async function remove(req, res, next) {
+  return cancel(req, res, next);
+}
+
+async function cancel(req, res, next) {
   try {
-    await shiftService.remove(req.params.eventId, req.params.shiftId);
-    res.status(204).send();
+    sendData(res, await shiftService.cancel(
+      req.params.eventId,
+      req.params.shiftId,
+      req.body,
+      req.membership
+    ));
   } catch (error) {
     next(error);
   }
 }
 
-module.exports = { create, list, get, update, remove };
+module.exports = { create, list, get, update, remove, cancel };
