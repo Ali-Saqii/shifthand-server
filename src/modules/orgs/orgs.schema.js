@@ -25,7 +25,7 @@ const memberId = organizationId.keys({
   userId: Joi.string().guid({ version: 'uuidv4' }).required()
 });
 
-const invite = organizationId.keys({
+const invite = Joi.object({
   email: Joi.string().trim().lowercase().email().required(),
   role: Joi.string().valid('coordinator', 'shift_lead').required()
 });
@@ -34,7 +34,7 @@ const acceptInvite = Joi.object({
   code: Joi.string().trim().length(8).pattern(/^[A-Z0-9]+$/).required()
 });
 
-const updateMember = memberId.keys({
+const updateMember = Joi.object({
   role: Joi.string().valid('owner', 'coordinator', 'shift_lead').required()
 });
 

@@ -5,6 +5,7 @@ async function create(req, res, next) {
   try {
     sendData(res, await orgService.createWithDetails(req.user.id, req.body), 201);
   } catch (error) {
+    console.error(`Error creating organization: ${error.message}`);
     next(error);
   }
 }

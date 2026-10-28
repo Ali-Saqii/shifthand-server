@@ -11,7 +11,7 @@ async function create(userId, name) {
 
 async function createWithDetails(userId, { name, timezone }) {
   const { Organization, Membership } = models();
-  const { sequelize } = require('../../db');
+  const sequelize = require('../../db');
   return sequelize.transaction(async (transaction) => {
     const organization = await Organization.create({ name, timezone }, { transaction });
     await Membership.create({
@@ -19,6 +19,8 @@ async function createWithDetails(userId, { name, timezone }) {
       userId,
       role: 'owner'
     }, { transaction });
+
+    console.log(`Organization created: ${organization.id} by user: ${userId}`);
     return organization;
   });
 }
@@ -70,6 +72,7 @@ async function addMember(organizationId, email, role) {
 
   const membership = await Membership.create({ organizationId, userId: user.id, role });
   return { user: { id: user.id, name: user.name, email: user.email }, role: membership.role };
+
 }
 
 async function createInvite(organizationId, email, role) {
@@ -92,7 +95,7 @@ function hashInviteCode(code) {
 
 async function acceptInvite(userId, organizationId, code) {
   const { StaffInvite, Membership, User } = models();
-  const { sequelize } = require('../../db');
+  const sequelize = require('../../db');
   return sequelize.transaction(async (transaction) => {
     const user = await User.findByPk(userId, { attributes: ['email'], transaction });
     if (!user) {
@@ -133,7 +136,7 @@ async function acceptInvite(userId, organizationId, code) {
 
 async function removeMember(organizationId, userId) {
   const { Membership } = models();
-  const { sequelize } = require('../../db');
+  const sequelize = require('../../db');
   await sequelize.transaction(async (transaction) => {
     const membership = await Membership.findOne({
       where: { organizationId, userId },
@@ -152,7 +155,7 @@ async function removeMember(organizationId, userId) {
 
 async function updateMember(organizationId, userId, role) {
   const { Membership } = models();
-  const { sequelize } = require('../../db');
+  const sequelize = require('../../db');
   return sequelize.transaction(async (transaction) => {
     const membership = await Membership.findOne({
       where: { organizationId, userId },
