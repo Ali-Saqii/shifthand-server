@@ -13,7 +13,6 @@ const meController = require('./modules/auth/me.controller');
 const errorHandler = require('./middleware/errorHandler');
 const requestContext = require('./middleware/requestContext');
 const AppError = require('./lib/AppError');
-const eventController = require('./modules/events/events.controller');
 const eventSchema = require('./modules/events/events.schema');
 
 const app = express();
@@ -38,7 +37,7 @@ app.get('/api/v1/me', authenticate, meController.me);
 app.get(
   '/api/v1/public/events/:publicSlug',
   validatePublicEventSlug,
-  eventController.getPublic
+  (req, res, next) => require('./modules/events/events.controller').getPublic(req, res, next)
 );
 
 app.get('/health', async (req, res, next) => {
