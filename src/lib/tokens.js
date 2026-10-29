@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 
 function createAccessToken(user) {
-  return jwt.sign({ sub: user.id, type: 'access' }, config.jwt.accessSecret, { expiresIn: '15m' });
+  return jwt.sign({ sub: user.id, type: 'access' }, config.jwt.accessSecret, { expiresIn: config.jwt.accessTtl });
 }
 
 function createRefreshToken(user) {

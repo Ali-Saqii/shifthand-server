@@ -5,6 +5,7 @@ const {
   createRefreshToken,
   hashToken
 } = require('../../lib/tokens');
+const config = require('../../config');
 
 function getModels() {
   return require('../../db/models');
@@ -43,7 +44,7 @@ async function register({ name, email, password, phone }) {
   await RefreshToken.create({
     userId: user.id,
     tokenHash: hashToken(refreshToken),
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    expiresAt: new Date(Date.now() + config.jwt.refreshTtlDays * 24 * 60 * 60 * 1000)
   });
   return tokenResponse(user, refreshToken);
 }
@@ -59,7 +60,7 @@ async function login({ email, password }) {
   await RefreshToken.create({
     userId: user.id,
     tokenHash: hashToken(refreshToken),
-    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    expiresAt: new Date(Date.now() + config.jwt.refreshTtlDays * 24 * 60 * 60 * 1000)
   });
   return tokenResponse(user, refreshToken);
 }

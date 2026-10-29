@@ -131,9 +131,39 @@ async function getPublic(publicSlug) {
   if (!event) {
     throw new AppError('Event not found', 404, 'EVENT_NOT_FOUND');
   }
+
   return event;
 }
 
+async function getPublicPage(publicSlug) {
+  const { Event, Shift, Signup } = models();
+  const event = await Event.findOne({ where: { publicSlug } });
+  if (!event || !['published', 'cancelled'].includes(event.status)) {
+    return { state: 'not_found', event: null, shifts: [] };
+  }
+  if (event.status === 'cancelled') {
+    return { state: 'cancelled', event, shifts: [] };
+  }
+
+  const shifts = await Shift.findAll({
+    where: { eventId: event.id, status: 'active' },
+    order: [['startsAt', 'ASC']]
+  });
+  const withCounts = await Promise.all(shifts.map(async (shift) => ({
+    ...shift.toJSON(),
+    confirmedCount: await Signup.count({
+      where: { shiftId: shift.id, status: ['unverified', 'pending', 'confirmed', 'offered'] }
+    })
+  })));
+  return {
+    state: withCounts.length > 0 && withCounts.every((shift) => shift.confirmedCount >= shift.capacity)
+      ? 'full'
+      : 'published',
+    event,
+    shifts: withCounts
+  };
+}
+
 module.exports = {
-  create, list, get, update, remove, publish, cancel, getPublic, findOrganizationEvent
+  create, list, get, update, remove, publish, cancel, getPublic, getPublicPage, findOrganizationEvent
 };

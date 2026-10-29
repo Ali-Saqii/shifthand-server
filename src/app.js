@@ -14,11 +14,28 @@ const errorHandler = require('./middleware/errorHandler');
 const requestContext = require('./middleware/requestContext');
 const AppError = require('./lib/AppError');
 const eventSchema = require('./modules/events/events.schema');
+const config = require('./config');
 
 const app = express();
 
-app.use(helmet());
-app.use(cors());
+app.set('trust proxy', 1);
+app.use(cors({
+  origin: config.corsOrigins.includes('*') ? true : config.corsOrigins
+}));
+app.use(helmet({
+  referrerPolicy: { policy: 'no-referrer' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      baseUri: ["'none'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"],
+      objectSrc: ["'none'"],
+      scriptSrc: ["'none'"],
+      styleSrc: ["'unsafe-inline'"]
+    }
+  }
+}));
 app.use(requestContext);
 app.use(express.json());
 function mountApiRoutes(prefix) {
@@ -39,6 +56,12 @@ app.get(
   validatePublicEventSlug,
   (req, res, next) => require('./modules/events/events.controller').getPublic(req, res, next)
 );
+app.get('/e/:publicSlug', (req, res, next) => {
+  require('./modules/events/public.controller').page(req, res, next);
+});
+app.get('/api/v1/e/:publicSlug', (req, res, next) => {
+  require('./modules/events/public.controller').page(req, res, next);
+});
 
 app.get('/health', async (req, res, next) => {
   try {
