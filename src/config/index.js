@@ -19,7 +19,13 @@ const schema = Joi.object({
   REFRESH_TTL_DAYS: Joi.number().integer().min(1).default(30),
   PUBLIC_URL: Joi.string().uri({ scheme: ['http', 'https'] }),
   PUBLIC_BASE_URL: Joi.string().uri({ scheme: ['http', 'https'] }),
-  CORS_ORIGINS: Joi.string().default('*')
+  CORS_ORIGINS: Joi.string().default('*'),
+  EMAIL_API_KEY: Joi.string().allow(''),
+  EMAIL_FROM: Joi.string().allow(''),
+  EMAIL_DRIVER: Joi.string().valid('console', 'resend').default(
+    process.env.NODE_ENV === 'production' ? 'resend' : 'console'
+  ),
+  VOLUNTEER_TOKEN_TTL_MINUTES: Joi.number().integer().min(5).default(30)
 }).unknown(true);
 
 const { value: env, error } = schema.validate(process.env, {
@@ -60,5 +66,11 @@ module.exports = {
     refreshTtlDays: env.REFRESH_TTL_DAYS
   },
   publicUrl: env.PUBLIC_BASE_URL || env.PUBLIC_URL || 'http://localhost:3000',
-  corsOrigins: env.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+  corsOrigins: env.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean),
+  email: {
+    apiKey: env.EMAIL_API_KEY,
+    from: env.EMAIL_FROM,
+    driver: env.EMAIL_DRIVER
+  },
+  volunteerTokenTtlMinutes: env.VOLUNTEER_TOKEN_TTL_MINUTES
 };

@@ -10,6 +10,9 @@ const Signup = require('./Signup');
 const DeviceToken = require('./DeviceToken');
 const RefreshToken = require('./RefreshToken');
 const StaffInvite = require('./StaffInvite');
+const Volunteer = require('./Volunteer');
+const VolunteerAccessToken = require('./VolunteerAccessToken');
+const MessageDelivery = require('./MessageDelivery');
 
 User.belongsToMany(Organization, { through: Membership, foreignKey: 'userId', otherKey: 'organizationId' });
 Organization.belongsToMany(User, { through: Membership, foreignKey: 'organizationId', otherKey: 'userId' });
@@ -31,6 +34,12 @@ User.hasMany(RefreshToken, { foreignKey: 'userId' });
 RefreshToken.belongsTo(User, { foreignKey: 'userId' });
 Organization.hasMany(StaffInvite, { foreignKey: 'organizationId' });
 StaffInvite.belongsTo(Organization, { foreignKey: 'organizationId' });
+Organization.hasMany(Volunteer, { foreignKey: 'organizationId' });
+Volunteer.belongsTo(Organization, { foreignKey: 'organizationId' });
+Volunteer.hasMany(VolunteerAccessToken, { foreignKey: 'volunteerId' });
+VolunteerAccessToken.belongsTo(Volunteer, { foreignKey: 'volunteerId' });
+Organization.hasMany(MessageDelivery, { foreignKey: 'organizationId' });
+MessageDelivery.belongsTo(Organization, { foreignKey: 'organizationId' });
 
 module.exports = {
   sequelize,
@@ -42,5 +51,8 @@ module.exports = {
   Signup,
   DeviceToken,
   RefreshToken,
-  StaffInvite
+  StaffInvite,
+  Volunteer,
+  VolunteerAccessToken,
+  MessageDelivery
 };

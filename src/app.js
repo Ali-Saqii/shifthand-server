@@ -15,6 +15,7 @@ const requestContext = require('./middleware/requestContext');
 const AppError = require('./lib/AppError');
 const eventSchema = require('./modules/events/events.schema');
 const config = require('./config');
+const volunteerRoutes = require('./modules/volunteers/volunteers.routes');
 
 const app = express();
 
@@ -49,6 +50,9 @@ function mountApiRoutes(prefix) {
 
 mountApiRoutes('');
 mountApiRoutes('/api/v1');
+app.use('/api/v1/public', volunteerRoutes);
+app.use('/public', volunteerRoutes);
+app.use('/v', volunteerRoutes);
 app.get('/me', authenticate, meController.me);
 app.get('/api/v1/me', authenticate, meController.me);
 app.get(
