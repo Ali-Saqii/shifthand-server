@@ -1,15 +1,15 @@
 const AppError = require('../lib/AppError');
 
-function rateLimit({ windowMs = 60 * 1000, max = 60 } = {}) {
+function rateLimit({ windowMs = 60 * 1000, max = 60, key = (req) => req.ip || req.socket.remoteAddress || 'unknown' } = {}) {
   const requests = new Map();
 
   return (req, res, next) => {
-    const key = req.ip || req.socket.remoteAddress || 'unknown';
+    const requestKey = key(req);
     const now = Date.now();
-    const current = requests.get(key);
+    const current = requests.get(requestKey);
 
     if (!current || current.expiresAt <= now) {
-      requests.set(key, { count: 1, expiresAt: now + windowMs });
+      requests.set(requestKey, { count: 1, expiresAt: now + windowMs });
       next();
       return;
     }

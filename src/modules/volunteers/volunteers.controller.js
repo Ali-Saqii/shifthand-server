@@ -20,4 +20,15 @@ async function verifyAccess(req, res, next) {
   }
 }
 
-module.exports = { requestAccess, verifyAccess };
+async function resendAccess(req, res, next) {
+  try {
+    sendData(res, await volunteerService.resendAccess(
+      req.body.organizationId,
+      req.body.email
+    ), 202);
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { requestAccess, verifyAccess, resendAccess };

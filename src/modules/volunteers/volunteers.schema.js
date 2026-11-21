@@ -16,4 +16,13 @@ const tokenParams = Joi.object({
   token: Joi.string().hex().length(64).required()
 });
 
-module.exports = { params, accessRequest, tokenParams };
+const signupParams = Joi.object({
+  signupId: Joi.string().guid({ version: 'uuidv4' }).required()
+});
+
+const resend = Joi.object({
+  organizationId: Joi.string().guid({ version: 'uuidv4' }).required(),
+  email: Joi.string().email().lowercase().required()
+});
+
+module.exports = { params, accessRequest, tokenParams, signupParams, resend };

@@ -13,6 +13,7 @@ const StaffInvite = require('./StaffInvite');
 const Volunteer = require('./Volunteer');
 const VolunteerAccessToken = require('./VolunteerAccessToken');
 const MessageDelivery = require('./MessageDelivery');
+const IdempotencyKey = require('./IdempotencyKey');
 
 User.belongsToMany(Organization, { through: Membership, foreignKey: 'userId', otherKey: 'organizationId' });
 Organization.belongsToMany(User, { through: Membership, foreignKey: 'organizationId', otherKey: 'userId' });
@@ -38,6 +39,8 @@ Organization.hasMany(Volunteer, { foreignKey: 'organizationId' });
 Volunteer.belongsTo(Organization, { foreignKey: 'organizationId' });
 Volunteer.hasMany(VolunteerAccessToken, { foreignKey: 'volunteerId' });
 VolunteerAccessToken.belongsTo(Volunteer, { foreignKey: 'volunteerId' });
+Volunteer.hasMany(Signup, { foreignKey: 'volunteerId' });
+Signup.belongsTo(Volunteer, { foreignKey: 'volunteerId' });
 Organization.hasMany(MessageDelivery, { foreignKey: 'organizationId' });
 MessageDelivery.belongsTo(Organization, { foreignKey: 'organizationId' });
 
@@ -54,5 +57,6 @@ module.exports = {
   StaffInvite,
   Volunteer,
   VolunteerAccessToken,
-  MessageDelivery
+  MessageDelivery,
+  IdempotencyKey
 };

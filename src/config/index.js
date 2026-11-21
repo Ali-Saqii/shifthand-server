@@ -25,7 +25,8 @@ const schema = Joi.object({
   EMAIL_DRIVER: Joi.string().valid('console', 'resend').default(
     process.env.NODE_ENV === 'production' ? 'resend' : 'console'
   ),
-  VOLUNTEER_TOKEN_TTL_MINUTES: Joi.number().integer().min(5).default(30)
+  VOLUNTEER_TOKEN_TTL_MINUTES: Joi.number().integer().min(5).default(30),
+  VOLUNTEER_COOKIE_SECRET: Joi.string().min(32).allow('')
 }).unknown(true);
 
 const { value: env, error } = schema.validate(process.env, {
@@ -72,5 +73,6 @@ module.exports = {
     from: env.EMAIL_FROM,
     driver: env.EMAIL_DRIVER
   },
-  volunteerTokenTtlMinutes: env.VOLUNTEER_TOKEN_TTL_MINUTES
+  volunteerTokenTtlMinutes: env.VOLUNTEER_TOKEN_TTL_MINUTES,
+  volunteerCookieSecret: env.VOLUNTEER_COOKIE_SECRET || accessSecret
 };

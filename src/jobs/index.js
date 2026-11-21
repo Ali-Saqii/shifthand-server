@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const { sendUpcomingShiftReminders } = require('./reminders');
 const { processOutbox } = require('./outbox');
+const { expireUnverifiedSignups } = require('./expired-holds');
 const logger = require('../lib/logger');
 
 function startJobs() {
@@ -14,6 +15,11 @@ function startJobs() {
       await processOutbox();
     } catch (error) {
       logger.error({ err: error }, 'Message outbox job failed');
+    }
+    try {
+      await expireUnverifiedSignups();
+    } catch (error) {
+      logger.error({ err: error }, 'Expired holds job failed');
     }
   });
 }

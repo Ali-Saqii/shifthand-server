@@ -88,4 +88,19 @@ async function verifyAccess(rawToken) {
   };
 }
 
-module.exports = { requestAccess, verifyAccess };
+async function resendAccess(organizationId, email) {
+  const { Volunteer, Organization } = models();
+  const organization = await Organization.findByPk(organizationId, { attributes: ['id'] });
+  if (!organization) return { message: 'If the email is eligible, an access link will be sent.' };
+  const volunteer = await Volunteer.findOne({
+    where: { organizationId, email: normalizeEmail(email), blocked: false }
+  });
+  if (!volunteer) return { message: 'If the email is eligible, an access link will be sent.' };
+  return requestAccess(organizationId, {
+    name: volunteer.name,
+    email: volunteer.email,
+    phone: volunteer.phone
+  });
+}
+
+module.exports = { requestAccess, verifyAccess, resendAccess };

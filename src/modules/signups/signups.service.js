@@ -45,7 +45,13 @@ async function create(shiftId, userId) {
       throw new AppError('You are already signed up for this shift', 409, 'SIGNUP_ALREADY_EXISTS');
     }
 
-    const count = await Signup.count({ where: { shiftId }, transaction });
+    const count = await Signup.count({
+      where: {
+        shiftId,
+        status: ['unverified', 'pending', 'confirmed', 'offered']
+      },
+      transaction
+    });
     if (count >= shift.capacity) {
       throw new AppError('This shift is full', 409, 'SHIFT_CAPACITY_REACHED');
     }

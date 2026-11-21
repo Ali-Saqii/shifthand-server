@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const sequelize = require('./db');
 const createAuthRouter = require('./modules/auth/auth.routes');
 const orgRoutes = require('./modules/orgs/orgs.routes');
@@ -16,10 +17,12 @@ const AppError = require('./lib/AppError');
 const eventSchema = require('./modules/events/events.schema');
 const config = require('./config');
 const volunteerRoutes = require('./modules/volunteers/volunteers.routes');
+const volunteerPortalRoutes = require('./modules/volunteers/volunteer.routes');
 
 const app = express();
 
 app.set('trust proxy', 1);
+app.use(cookieParser(config.jwt.accessSecret));
 app.use(cors({
   origin: config.corsOrigins.includes('*') ? true : config.corsOrigins
 }));
@@ -52,7 +55,9 @@ mountApiRoutes('');
 mountApiRoutes('/api/v1');
 app.use('/api/v1/public', volunteerRoutes);
 app.use('/public', volunteerRoutes);
+app.use('/', volunteerRoutes);
 app.use('/v', volunteerRoutes);
+app.use('/v', volunteerPortalRoutes);
 app.get('/me', authenticate, meController.me);
 app.get('/api/v1/me', authenticate, meController.me);
 app.get(

@@ -24,6 +24,20 @@ function renderMessage(message) {
   if (message.template === 'volunteer-access') {
     return renderVolunteerAccess(message.payload);
   }
+  if (message.template === 'signup-confirmation') {
+    return {
+      subject: `Confirm your ShiftHand signup: ${message.payload.shiftTitle}`,
+      text: `Hi ${message.payload.name},\n\nYour place is held until ${message.payload.holdExpiresAt}. Use your volunteer access link to confirm your signup.`,
+      html: `<p>Hi ${escapeHtml(message.payload.name)},</p><p>Your place is held until ${escapeHtml(message.payload.holdExpiresAt)}.</p><p>Use your volunteer access link to confirm your signup.</p>`
+    };
+  }
+  if (message.template === 'signup-cancellation') {
+    return {
+      subject: `ShiftHand cancellation confirmed: ${message.payload.shiftTitle}`,
+      text: `Hi ${message.payload.name},\n\nYour signup for ${message.payload.shiftTitle} was cancelled.`,
+      html: `<p>Hi ${escapeHtml(message.payload.name)},</p><p>Your signup for ${escapeHtml(message.payload.shiftTitle)} was cancelled.</p>`
+    };
+  }
   throw new Error(`Unsupported message template: ${message.template}`);
 }
 
